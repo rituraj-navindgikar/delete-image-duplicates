@@ -1,0 +1,7 @@
+tk
+opencv-python
+numpy
+tqdm
+pyheif
+pillow
+pillow-heif
