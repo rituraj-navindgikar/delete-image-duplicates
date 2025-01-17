@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from tkinter import Tk
 from tkinter import filedialog
 
 from cv2 import imread, calcHist, normalize, compareHist, IMREAD_GRAYSCALE, HISTCMP_BHATTACHARYYA
@@ -7,16 +6,12 @@ from os import listdir, path, chdir, makedirs
 
 from shutil import move
 
-from numpy import array
 from tqdm import tqdm
 from collections import defaultdict
 
-from PIL.Image import frombytes
 
 def select_image_folder():
-
     folder_path = filedialog.askdirectory(title="Select Image Folder")
-
     return folder_path
 
 
@@ -32,18 +27,6 @@ def get_image_files():
     ]
     return image_files
 
-
-def compute_histogram(image_path):
-    """
-    Compute the normalized grayscale histogram of an image.
-    """
-    image = imread(image_path, IMREAD_GRAYSCALE)
-    if image is None:
-        return None  # Return None if the image can't be read
-    hist = calcHist([image], [0], None, [256], [0, 256])
-    return normalize(hist, hist).flatten()
-
-
 def compute_histogram(image, num_buckets=256):
     """
     Compute the normalized grayscale histogram of an image.
@@ -56,29 +39,6 @@ def compute_histogram(image, num_buckets=256):
     hist = calcHist([image], [0], None, [num_buckets], [0, 256])
     return normalize(hist, hist).flatten()
 
-
-def group_images_by_size(image_paths):
-    """
-    Group images by their size to reduce unnecessary comparisons.
-    Args:
-        image_paths (list): List of image paths.
-    Returns:
-        dict: Groups of image paths keyed by image dimensions.
-    """
-    size_groups = defaultdict(list)
-    
-    # Add tqdm progress bar
-    for img_path in tqdm(image_paths, desc="Grouping Images by Size", unit="image"):
-        img = imread(img_path, IMREAD_GRAYSCALE)
-        if img is None:
-            continue
-        size_groups[img.shape].append(img_path)
-    
-    return size_groups
-
-def read_image(file_path):
-    # Handle standard formats using OpenCV
-    return imread(file_path, IMREAD_GRAYSCALE)
 
 def compare_images_histograms(image_paths, threshold=0.99):
     """
@@ -174,12 +134,22 @@ def main():
     chdir(image_folder_path)
 
     image_files = get_image_files()
-    print("Images found ", len(image_files))
-
+    if image_files:
+        print("Images found ", len(image_files))
+    else:
+        print("No image files found")
+    
     similar_groups = compare_images_histograms(image_files)
-    print("Similar images ", similar_groups)
+    if similar_groups:
+        print("Similar images ", similar_groups)
+    else:
+        print("No similar Images found!")
 
     move_duplicate_images(similar_groups)
+            
+            
 
 if __name__ == "__main__":
     main()
+    print("All done!")
+    input("\nPress Enter to close this window...")
