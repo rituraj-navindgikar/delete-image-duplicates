@@ -11,9 +11,6 @@ from numpy import array
 from tqdm import tqdm
 from collections import defaultdict
 
-# import pyheif
-from pyheif import read
-
 from PIL.Image import frombytes
 
 def select_image_folder():
@@ -25,7 +22,7 @@ def select_image_folder():
 
 def get_image_files():
     # Define supported image extensions
-    image_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif', '.heic', '.heif')
+    image_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif')
 
     # Get all files in the folder and filter only images
     image_files = [
@@ -69,88 +66,57 @@ def group_images_by_size(image_paths):
         dict: Groups of image paths keyed by image dimensions.
     """
     size_groups = defaultdict(list)
-    for img_path in image_paths:
+    
+    # Add tqdm progress bar
+    for img_path in tqdm(image_paths, desc="Grouping Images by Size", unit="image"):
         img = imread(img_path, IMREAD_GRAYSCALE)
         if img is None:
             continue
         size_groups[img.shape].append(img_path)
+    
     return size_groups
 
 def read_image(file_path):
-    """
-    Reads an image file, supporting standard formats (via OpenCV) and HEIC/HEIF formats (via pyheif).
-    Converts the image to grayscale.
-    Args:
-        file_path (str): Path to the image file.
-    Returns:
-        np.ndarray: Grayscale image, or None if the image cannot be read.
-    """
-    # Handle HEIC/HEIF formats
-    if file_path.lower().endswith(('.heic', '.heif')):
-        try:
-            heif_file = read(file_path)
-            image = frombytes(
-                heif_file.mode,
-                heif_file.size,
-                heif_file.data,
-                "raw",
-                heif_file.mode,
-                heif_file.stride,
-            )
-            return array(image.convert("L"))  # Convert to grayscale
-        except Exception as e:
-            print(f"Error reading HEIC/HEIF file {file_path}: {e}")
-            return None
-
     # Handle standard formats using OpenCV
     return imread(file_path, IMREAD_GRAYSCALE)
 
 def compare_images_histograms(image_paths, threshold=0.99):
     """
-    Compare images using histogram similarity.
+    Compare images using histogram similarity without grouping by size.
     Args:
         image_paths (list): List of image file paths.
         threshold (float): Similarity threshold for considering duplicates.
     Returns:
         dict: Dictionary where each key is an image, and its value is a list of similar images.
     """
-    # Group images by size to reduce unnecessary comparisons
-    size_groups = group_images_by_size(image_paths)
-
     similar_dict = {}
 
-    # Compute the total number of images for the general progress bar
-    total_images = sum(len(group) for group in size_groups.values())
+    # Track histogram computation and comparison
+    histograms = []
+    for img_path in tqdm(image_paths, desc="Computing Histograms", unit="image"):
+        img = imread(img_path, IMREAD_GRAYSCALE)
+        if img is None:
+            continue
+        hist = compute_histogram(img)
+        histograms.append((img_path, hist))
 
-    with tqdm(total=total_images, desc="Processing Images", unit="image") as pbar:
-        # Process each size group separately
-        for size, group in size_groups.items():
-            histograms = []
-            for img_path in group:
-                img = read_image(img_path)  # Use the updated read_image function
-                if img is None:
-                    pbar.update(1)  # Update progress even for skipped images
-                    continue
-                hist = compute_histogram(img)
-                histograms.append((img_path, hist))
-                pbar.update(1)  # Update progress for histogram computation
+    # Compare histograms
+    for i in tqdm(range(len(histograms)), desc="Comparing Images", unit="image"):
+        current_image, current_hist = histograms[i]
+        current_group = []
+        for j in range(i + 1, len(histograms)):
+            other_image, other_hist = histograms[j]
 
-            # Compare histograms within this group
-            for i in range(len(histograms)):
-                current_image, current_hist = histograms[i]
-                current_group = []
-                for j in range(i + 1, len(histograms)):
-                    other_image, other_hist = histograms[j]
+            # Use Bhattacharyya distance for comparison
+            similarity = 1 - compareHist(current_hist, other_hist, HISTCMP_BHATTACHARYYA)
+            if similarity > threshold:
+                current_group.append(other_image)
 
-                    # Use Bhattacharyya distance for faster comparison
-                    similarity = 1 - compareHist(current_hist, other_hist, HISTCMP_BHATTACHARYYA)
-                    if similarity > threshold:
-                        current_group.append(other_image)
-
-                if current_group:
-                    similar_dict[current_image] = current_group
+        if current_group:
+            similar_dict[current_image] = current_group
 
     return similar_dict
+
 
 
 def move_duplicate_images(similar_dict, destination_folder="!duplicate_images"):
@@ -208,18 +174,12 @@ def main():
     chdir(image_folder_path)
 
     image_files = get_image_files()
-    print("images found ", len(image_files))
+    print("Images found ", len(image_files))
 
     similar_groups = compare_images_histograms(image_files)
-    print("similar images ", similar_groups)
+    print("Similar images ", similar_groups)
 
     move_duplicate_images(similar_groups)
 
 if __name__ == "__main__":
     main()
-
-# 1192
-# -954
-# =232
-
-# 238
