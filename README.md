@@ -64,6 +64,14 @@ image4.jpg : image5.jpg
 Duplicate images moved to the !duplicate_images folder
 ```
 
+# My Preference 
+I believe it's best to convert this in .exe file to run on any windows system without worrying about installing python and its dependencies
+```bash
+pyinstaller --onefile main.py
+```
+
+---
+
 ### Requirements
 Python 3.7 or higher
 Libraries: OpenCV, TQDM, Pillow, pyheif
