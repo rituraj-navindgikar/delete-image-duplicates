@@ -7,7 +7,6 @@ from os import listdir, path, chdir, makedirs
 from shutil import move
 
 from tqdm import tqdm
-from collections import defaultdict
 
 
 def select_image_folder():
