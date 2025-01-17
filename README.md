@@ -51,7 +51,7 @@ The tool uses a histogram-based method to compare images. This involves:
 - For HEIC/HEIF images, the tool leverages the pyheif library to decode and process these formats seamlessly (under progress)
 
 
-Example Output
+### Example Output
 When the script runs, you’ll see:
 - Progress updates for image processing.
 - Similar groups of images displayed as:
