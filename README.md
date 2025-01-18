@@ -37,7 +37,7 @@ python main.py
 3. The script will:
 
 - Compare all images in the selected folder
-- Identify duplicates based on a similarity threshold (default: 0.99)
+- Identify duplicates based on a similarity threshold (default: 0.8)
 - Move duplicate images into a folder named !duplicate_images
 
 --- 
