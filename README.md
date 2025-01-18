@@ -14,6 +14,13 @@ The solution is based on *image histogram comparison*, which is a computationall
 ---
 
 ## Getting Started
+### My Preference 
+I believe it's best to convert this in .exe file to run on any windows system without worrying about installing python and its dependencies
+```bash
+pyinstaller --onefile main.py
+```
+You can find the `.exe` file [here](https://drive.google.com/drive/folders/1dwrjuz5RSkdbU6Xnj_lR8b1uOE3ky19J?usp=sharing)
+---
 ### Installation
 1. Clone the repository:
 ```bash
@@ -63,15 +70,6 @@ image4.jpg : image5.jpg
 
 Duplicate images moved to the !duplicate_images folder
 ```
-
-# My Preference 
-I believe it's best to convert this in .exe file to run on any windows system without worrying about installing python and its dependencies
-```bash
-pyinstaller --onefile main.py
-```
-You can find the `.exe` file [here](https://drive.google.com/drive/folders/1dwrjuz5RSkdbU6Xnj_lR8b1uOE3ky19J?usp=sharing)
-
----
 
 ### Requirements
 Python 3.7 or higher
