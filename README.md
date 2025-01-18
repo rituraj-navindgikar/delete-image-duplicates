@@ -69,6 +69,7 @@ I believe it's best to convert this in .exe file to run on any windows system wi
 ```bash
 pyinstaller --onefile main.py
 ```
+You can find the `.exe` file [here](https://drive.google.com/drive/folders/1dwrjuz5RSkdbU6Xnj_lR8b1uOE3ky19J?usp=sharing)
 
 ---
 
