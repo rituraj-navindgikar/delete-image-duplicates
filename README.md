@@ -1,4 +1,4 @@
-# Duplicate Image Remover
+# Duplica
 This project solves the problem of having a large collection of images (100GB+ in my case) with duplicate files scattered across folders. The tool efficiently identifies duplicate images and helps you organize or remove them, saving both storage and time
 
 The solution is based on *image histogram comparison*, which is a computationally efficient method for identifying visually similar images. Using OpenCV and other lightweight libraries, this approach can handle tens of thousands of images without breaking a sweat
